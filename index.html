@@ -32,6 +32,10 @@
             display: none;
         }
 
+        .win-screen {
+            display: none;
+        }
+
         .intro-screen h1 {
             color: #2c3e50;
             margin-bottom: 20px;
@@ -66,6 +70,53 @@
             border-radius: 8px;
             margin: 15px 0;
             border-left: 4px solid #27ae60;
+        }
+
+        /* Win Screen Styles */
+        .win-screen h1 {
+            color: #f39c12;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-10px); }
+        }
+
+        .celebration {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .win-message {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .win-stats {
+            background-color: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #27ae60;
+        }
+
+        .win-stats h3 {
+            color: #27ae60;
+            margin-top: 0;
         }
 
         .game-board {
@@ -144,6 +195,16 @@
         .back-button:hover {
             background-color: #7f8c8d;
         }
+
+        .play-again-button {
+            background-color: #f39c12;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+
+        .play-again-button:hover {
+            background-color: #e67e22;
+        }
     </style>
 </head>
 <body>
@@ -190,6 +251,29 @@
             <button onclick="resetGame()">🔄 New Game</button>
             <button class="back-button" onclick="showIntro()">📖 Instructions</button>
         </div>
+
+        <!-- Win Screen -->
+        <div id="winScreen" class="win-screen">
+            <h1>🎉 You Won! 🎉</h1>
+            
+            <div class="celebration">🏆</div>
+            
+            <div class="win-message">
+                <strong>Congratulations!</strong><br>
+                You successfully found all 6 matching pairs!<br>
+                Your memory skills are amazing! 🧠✨
+            </div>
+
+            <div class="win-stats">
+                <h3>🎯 Game Complete!</h3>
+                <p><strong>Total Pairs Found:</strong> 6/6</p>
+                <p><strong>Status:</strong> Perfect Match! 🌟</p>
+                <p>Great job remembering where all the shapes were hidden!</p>
+            </div>
+
+            <button class="play-again-button" onclick="playAgain()">🎮 Play Again</button>
+            <button class="back-button" onclick="showIntro()">📖 View Instructions</button>
+        </div>
     </div>
 
     <script>
@@ -206,12 +290,25 @@
         function startGame() {
             document.getElementById('introScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('winScreen').style.display = 'none';
             initGame();
         }
 
         function showIntro() {
             document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winScreen').style.display = 'none';
             document.getElementById('introScreen').style.display = 'block';
+        }
+
+        function showWinScreen() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winScreen').style.display = 'block';
+        }
+
+        function playAgain() {
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            initGame();
         }
 
         // Initialize the game
@@ -288,8 +385,8 @@
                 // Check if game is won
                 if (matchedPairs === 6) {
                     setTimeout(() => {
-                        alert('🎉 Congratulations! You won! 🎉\nYou found all 6 pairs!');
-                    }, 500);
+                        showWinScreen();
+                    }, 1000);
                 }
             } else {
                 // Cards don't match, flip them back
