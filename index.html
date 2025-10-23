@@ -21,6 +21,51 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+
+        .intro-screen {
+            display: block;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .intro-screen h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            text-align: left;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .instructions h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .goal {
+            background-color: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
         }
 
         .game-board {
@@ -67,27 +112,84 @@
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
             background-color: #e74c3c;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
             background-color: #c0392b;
         }
+
+        .start-button {
+            background-color: #27ae60;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+
+        .start-button:hover {
+            background-color: #219a52;
+        }
+
+        .back-button {
+            background-color: #95a5a6;
+        }
+
+        .back-button:hover {
+            background-color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Memory Match Game</h1>
-        <div class="score">Matches: <span id="score">0</span>/6</div>
-        <div class="game-board" id="gameBoard"></div>
-        <button onclick="resetGame()">New Game</button>
+        <!-- Introduction Screen -->
+        <div id="introScreen" class="intro-screen">
+            <h1>🧠 Memory Match Game</h1>
+            
+            <div class="goal">
+                <strong>🎯 Goal:</strong> Find all 6 matching pairs of shapes to win the game!
+            </div>
+
+            <div class="instructions">
+                <h3>📋 How to Play:</h3>
+                <ul>
+                    <li>There are <strong>12 cards</strong> arranged in a grid</li>
+                    <li>Each card has a <strong>hidden shape</strong> behind it</li>
+                    <li>There are <strong>6 different shapes</strong>, with 2 cards of each shape</li>
+                    <li><strong>Click on a card</strong> to reveal its shape</li>
+                    <li>Click on a <strong>second card</strong> to see if they match</li>
+                    <li>If the shapes <strong>match</strong>, both cards will fade away</li>
+                    <li>If they <strong>don't match</strong>, both cards will flip back over</li>
+                    <li>Keep trying until you find all 6 pairs!</li>
+                </ul>
+            </div>
+
+            <div class="instructions">
+                <h3>💡 Tips:</h3>
+                <ul>
+                    <li>Try to <strong>remember</strong> where you saw each shape</li>
+                    <li>Start by exploring different areas of the grid</li>
+                    <li>Use your memory to make strategic matches</li>
+                </ul>
+            </div>
+
+            <button class="start-button" onclick="startGame()">🎮 Start Playing!</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <h1>Memory Match Game</h1>
+            <div class="score">Matches: <span id="score">0</span>/6</div>
+            <div class="game-board" id="gameBoard"></div>
+            <button onclick="resetGame()">🔄 New Game</button>
+            <button class="back-button" onclick="showIntro()">📖 Instructions</button>
+        </div>
     </div>
 
     <script>
@@ -99,6 +201,18 @@
 
         // Shapes for the cards (using emojis for simplicity)
         const shapes = ['⭐', '❤️', '🔥', '⚡', '🌙', '☀️'];
+
+        // Show/hide screens
+        function startGame() {
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            initGame();
+        }
+
+        function showIntro() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+        }
 
         // Initialize the game
         function initGame() {
@@ -173,7 +287,9 @@
                 
                 // Check if game is won
                 if (matchedPairs === 6) {
-                    setTimeout(() => alert('Congratulations! You won!'), 500);
+                    setTimeout(() => {
+                        alert('🎉 Congratulations! You won! 🎉\nYou found all 6 pairs!');
+                    }, 500);
                 }
             } else {
                 // Cards don't match, flip them back
@@ -196,9 +312,6 @@
         function resetGame() {
             initGame();
         }
-
-        // Start the game when page loads
-        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
