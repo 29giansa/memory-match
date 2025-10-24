@@ -1,166 +1,348 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>VR Memory Match Game</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #00C9FF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .game-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+
+        .intro-screen {
+            display: block;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .win-screen {
+            display: none;
+        }
+
+        .intro-screen h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            text-align: left;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .instructions h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .goal {
+            background-color: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
+        }
+
+        /* Win Screen Styles */
+        .win-screen h1 {
+            color: #f39c12;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-10px); }
+        }
+
+        .celebration {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .win-message {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .win-stats {
+            background-color: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #27ae60;
+        }
+
+        .win-stats h3 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px auto;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #FFB0B0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 30px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card.flipped {
+            background-color: #B1B5FC;
+        }
+
+        .card.matched {
+            background-color: #2ecc71;
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        .score {
+            font-size: 18px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #c0392b;
+        }
+
+        .start-button {
+            background-color: #27ae60;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+
+        .start-button:hover {
+            background-color: #219a52;
+        }
+
+        .back-button {
+            background-color: #95a5a6;
+        }
+
+        .back-button:hover {
+            background-color: #7f8c8d;
+        }
+
+        .play-again-button {
+            background-color: #f39c12;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+
+        .play-again-button:hover {
+            background-color: #e67e22;
+        }
+    </style>
 </head>
 <body>
-    <a-scene background="color: #00C9FF">
-        
-        <!-- Game Title -->
-        <a-text 
-            value="VR Memory Match Game" 
-            position="0 3 -4" 
-            align="center" 
-            color="black"
-            scale="1.5 1.5 1.5">
-        </a-text>
+    <div class="game-container">
+        <!-- Introduction Screen -->
+        <div id="introScreen" class="intro-screen">
+            <h1>🧠 Memory Match Game 🧠</h1>
+            
+            <div class="goal">
+                <strong>🎯 Goal:</strong> Find all 6 matching pairs of shapes to win the game!
+            </div>
 
-        <!-- Score Display -->
-        <a-text 
-            id="scoreText"
-            value="Matches: 0/6" 
-            position="0 2.5 -4" 
-            align="center" 
-            color="black">
-        </a-text>
+            <div class="instructions">
+                <h3>📋 How to Play 📋</h3>
+                <ul>
+                    <li>There are 12 cards arranged in a grid</li>
+                    <li>Each card has a hidden shape behind it</li>
+                    <li>There are 6 different shapes, with 2 cards of each shape</li>
+                    <li>Click on a card to reveal its shape</li>
+                    <li>Click on a second card to see if they match</li>
+                    <li>If the shapes match, both cards will fade away</li>
+                    <li>If they don't match, both cards will flip back over</li>
+                    <li>Keep trying until you find all 6 pairs!</li>
+                </ul>
+            </div>
 
-        <!-- Game Board -->
-        <a-entity id="gameBoard" position="0 0 -4">
-            <!-- Cards will be created here -->
-        </a-entity>
+            <div class="instructions">
+                <h3>💡 Tips 💡</h3>
+                <ul>
+                    <li>Try to remember where you saw each shape</li>
+                    <li>Start by exploring different areas of the grid</li>
+                    <li>Use your memory to make strategic matches</li>
+                </ul>
+            </div>
 
-        <!-- Reset Button -->
-        <a-box 
-            id="resetButton"
-            position="0 -2.5 -4" 
-            width="1.5" 
-            height="0.5" 
-            depth="0.1"
-            color="red"
-            class="clickable">
-            <a-text 
-                value="New Game" 
-                position="0 0 0.06" 
-                align="center" 
-                color="white">
-            </a-text>
-        </a-box>
+            <button class="start-button" onclick="startGame()">Start Playing!</button>
+        </div>
 
-        <!-- Win Message -->
-        <a-text 
-            id="winMessage"
-            value="You Won! Congratulations!" 
-            position="0 1.5 -4" 
-            align="center" 
-            color="orange"
-            scale="1.2 1.2 1.2"
-            visible="false">
-        </a-text>
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <h1>Memory Match Game</h1>
+            <div class="score">Matches: <span id="score">0</span>/6</div>
+            <div class="game-board" id="gameBoard"></div>
+            <button onclick="resetGame()">🔄 New Game</button>
+            <button class="back-button" onclick="showIntro()">📖 Instructions</button>
+        </div>
 
-        <!-- Camera with cursor -->
-        <a-camera>
-            <a-cursor 
-                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                material="color: white"
-                raycaster="objects: .clickable">
-            </a-cursor>
-        </a-camera>
+        <!-- Win Screen -->
+        <div id="winScreen" class="win-screen">
+            <h1>🎉 You Won! 🎉</h1>
+            
+            <div class="celebration">🏆</div>
+            
+            <div class="win-message">
+                <strong>Congratulations!</strong><br>
+                You successfully found all 6 matching pairs!<br>
+                Your memory skills are amazing! 🧠✨💡
+            </div>
 
-    </a-scene>
+            <div class="win-stats">
+                <h3>🎯 Game Complete!</h3>
+                <p><strong>Total Pairs Found:</strong> 6/6</p>
+                <p><strong>Status:</strong> Perfect Match! 🌟</p>
+                <p>Great job remembering where all the shapes were hidden!</p>
+            </div>
+
+            <button class="play-again-button" onclick="playAgain()">Play Again</button>
+            <button class="back-button" onclick="showIntro()">📖 View Instructions</button>
+        </div>
+    </div>
 
     <script>
-        // Wait for A-frame to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Give A-frame time to initialize
-            setTimeout(initGame, 1000);
-        });
-
         // Game variables
         let cards = [];
         let flippedCards = [];
         let matchedPairs = 0;
         let canFlip = true;
+
+        // Shapes for the cards (using emojis for simplicity)
         const shapes = ['⭐', '❤️', '🔥', '⚡', '🌙', '☀️'];
 
-        function initGame() {
-            console.log("Starting game..."); // Debug log
-            
-            const gameBoard = document.querySelector('#gameBoard');
-            if (!gameBoard) {
-                console.error("Game board not found!");
-                return;
-            }
+        // Show/hide screens
+        function startGame() {
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('winScreen').style.display = 'none';
+            initGame();
+        }
 
-            // Clear existing cards
+        function showIntro() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+        }
+
+        function showWinScreen() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winScreen').style.display = 'block';
+        }
+
+        function playAgain() {
+            document.getElementById('winScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            initGame();
+        }
+
+        // Initialize the game
+        function initGame() {
+            const gameBoard = document.getElementById('gameBoard');
             gameBoard.innerHTML = '';
-            
             cards = [];
             flippedCards = [];
             matchedPairs = 0;
             canFlip = true;
             
-            // Hide win message
-            const winMessage = document.querySelector('#winMessage');
-            if (winMessage) {
-                winMessage.setAttribute('visible', 'false');
-            }
-            
             // Create pairs of shapes
             const cardShapes = [...shapes, ...shapes];
+            
+            // Shuffle the cards
             shuffleArray(cardShapes);
             
-            // Create cards in a 4x3 grid
-            for (let i = 0; i < 12; i++) {
-                const row = Math.floor(i / 4);
-                const col = i % 4;
-                
-                // Position cards
-                const x = (col - 1.5) * 1.2;
-                const y = (1 - row) * 1.2;
-                
-                // Create card
-                const card = document.createElement('a-box');
-                card.setAttribute('class', 'clickable');
-                card.setAttribute('position', `${x} ${y} 0`);
-                card.setAttribute('width', '1');
-                card.setAttribute('height', '1');
-                card.setAttribute('depth', '0.1');
-                card.setAttribute('color', '#FFB0B0');
-                card.dataset.shape = cardShapes[i];
-                card.dataset.index = i;
-                
-                // Add text to card
-                const cardText = document.createElement('a-text');
-                cardText.setAttribute('value', '?');
-                cardText.setAttribute('position', '0 0 0.06');
-                cardText.setAttribute('align', 'center');
-                cardText.setAttribute('color', 'white');
-                cardText.setAttribute('scale', '2 2 2');
-                
-                card.appendChild(cardText);
-                
-                // Add click event
-                card.addEventListener('click', function() {
-                    flipCard(card);
-                });
+            // Create card elements
+            cardShapes.forEach((shape, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.shape = shape;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                card.textContent = '?';
                 
                 cards.push(card);
                 gameBoard.appendChild(card);
-            }
+            });
             
             updateScore();
-            
-            // Setup reset button
-            const resetButton = document.querySelector('#resetButton');
-            if (resetButton) {
-                resetButton.addEventListener('click', initGame);
-            }
-            
-            console.log("Game initialized with", cards.length, "cards");
         }
 
+        // Shuffle array function
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -168,65 +350,75 @@
             }
         }
 
-        function flipCard(card) {
-            if (!canFlip || card.flipped || card.matched) {
+        // Flip card function
+        function flipCard(event) {
+            const card = event.target;
+            
+            // Check if we can flip and card isn't already flipped or matched
+            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) {
                 return;
             }
             
             // Flip the card
-            card.flipped = true;
-            card.setAttribute('color', '#B1B5FC');
-            card.querySelector('a-text').setAttribute('value', card.dataset.shape);
+            card.classList.add('flipped');
+            card.textContent = card.dataset.shape;
             flippedCards.push(card);
             
+            // Check if two cards are flipped
             if (flippedCards.length === 2) {
                 canFlip = false;
                 setTimeout(checkMatch, 1000);
             }
         }
 
+        // Check if cards match
         function checkMatch() {
             const [card1, card2] = flippedCards;
             
             if (card1.dataset.shape === card2.dataset.shape) {
-                // Match!
-                card1.matched = true;
-                card2.matched = true;
-                card1.setAttribute('color', '#2ecc71');
-                card2.setAttribute('color', '#2ecc71');
+                // Cards match!
+                card1.classList.add('matched');
+                card2.classList.add('matched');
                 matchedPairs++;
                 updateScore();
                 
+                // Check if game is won
                 if (matchedPairs === 6) {
-                    setTimeout(showWinMessage, 500);
+                    setTimeout(() => {
+                        showWinScreen();
+                    }, 1000);
                 }
             } else {
-                // No match
-                card1.flipped = false;
-                card2.flipped = false;
-                card1.setAttribute('color', '#FFB0B0');
-                card2.setAttribute('color', '#FFB0B0');
-                card1.querySelector('a-text').setAttribute('value', '?');
-                card2.querySelector('a-text').setAttribute('value', '?');
+                // Cards don't match, flip them back
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '?';
+                card2.textContent = '?';
             }
             
             flippedCards = [];
             canFlip = true;
         }
 
+        // Update score display
         function updateScore() {
-            const scoreText = document.querySelector('#scoreText');
-            if (scoreText) {
-                scoreText.setAttribute('value', `Matches: ${matchedPairs}/6`);
-            }
+            document.getElementById('score').textContent = matchedPairs;
         }
 
-        function showWinMessage() {
-            const winMessage = document.querySelector('#winMessage');
-            if (winMessage) {
-                winMessage.setAttribute('visible', 'true');
-            }
+        // Reset game
+        function resetGame() {
+            initGame();
         }
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
