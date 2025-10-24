@@ -3,152 +3,98 @@
 <head>
     <meta charset="utf-8">
     <title>VR Memory Match Game</title>
-    <meta name="description" content="Memory Match Game in VR">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 </head>
 <body>
-    <a-scene 
-        vr-mode-ui="enabled: true" 
-        embedded
-        background="color: #00C9FF"
-        cursor="rayOrigin: mouse">
+    <a-scene background="color: #00C9FF">
         
-        <!-- Assets -->
-        <a-assets>
-            <a-mixin id="card" 
-                geometry="primitive: box; width: 1; height: 1.5; depth: 0.1"
-                material="color: #FFB0B0"
-                animation__mouseenter="property: scale; to: 1.1 1.1 1.1; startEvents: mouseenter; dur: 200"
-                animation__mouseleave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200">
-            </a-mixin>
-        </a-assets>
-
-        <!-- Lighting -->
-        <a-light type="ambient" color="#404040"></a-light>
-        <a-light type="directional" position="0 5 5" color="#ffffff"></a-light>
-
         <!-- Game Title -->
         <a-text 
-            id="gameTitle"
-            value="🧠 VR Memory Match Game 🧠" 
-            position="0 4 -5" 
+            value="VR Memory Match Game" 
+            position="0 3 -4" 
             align="center" 
-            color="#2c3e50"
-            scale="2 2 2">
+            color="black"
+            scale="1.5 1.5 1.5">
         </a-text>
 
         <!-- Score Display -->
         <a-text 
             id="scoreText"
             value="Matches: 0/6" 
-            position="0 3 -5" 
+            position="0 2.5 -4" 
             align="center" 
-            color="#34495e"
-            scale="1.5 1.5 1.5">
+            color="black">
         </a-text>
 
-        <!-- Game Board Container -->
-        <a-entity id="gameBoard" position="0 0 -5">
-            <!-- Cards will be dynamically created here -->
+        <!-- Game Board -->
+        <a-entity id="gameBoard" position="0 0 -4">
+            <!-- Cards will be created here -->
         </a-entity>
-
-        <!-- Win Message -->
-        <a-text 
-            id="winMessage"
-            value="🎉 You Won! 🎉\nCongratulations!\nYou found all pairs!" 
-            position="0 2 -5" 
-            align="center" 
-            color="#f39c12"
-            scale="1.8 1.8 1.8"
-            visible="false">
-        </a-text>
 
         <!-- Reset Button -->
         <a-box 
             id="resetButton"
-            position="0 -2 -5" 
-            width="2" 
-            height="0.8" 
-            depth="0.2"
-            color="#e74c3c"
+            position="0 -2.5 -4" 
+            width="1.5" 
+            height="0.5" 
+            depth="0.1"
+            color="red"
             class="clickable">
             <a-text 
-                value="🔄 New Game" 
-                position="0 0 0.11" 
+                value="New Game" 
+                position="0 0 0.06" 
                 align="center" 
-                color="white"
-                scale="1.2 1.2 1.2">
+                color="white">
             </a-text>
         </a-box>
 
-        <!-- VR Controls -->
-        <a-entity 
-            id="cameraRig" 
-            movement-controls="fly: false" 
-            position="0 1.6 0">
-            
-            <!-- VR Camera -->
-            <a-camera 
-                look-controls="pointerLockEnabled: true"
-                wasd-controls="enabled: false">
-                
-                <!-- VR Cursor for hand tracking -->
-                <a-cursor 
-                    position="0 0 -1"
-                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                    material="color: white; shader: flat"
-                    raycaster="objects: .clickable, .card"
-                    animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                    animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500">
-                </a-cursor>
-            </a-camera>
+        <!-- Win Message -->
+        <a-text 
+            id="winMessage"
+            value="You Won! Congratulations!" 
+            position="0 1.5 -4" 
+            align="center" 
+            color="orange"
+            scale="1.2 1.2 1.2"
+            visible="false">
+        </a-text>
 
-            <!-- Left Hand Controller (Oculus) -->
-            <a-entity 
-                id="leftHand"
-                oculus-touch-controls="hand: left"
-                laser-controls="hand: left"
-                raycaster="objects: .clickable, .card; lineColor: red; lineOpacity: 0.5">
-            </a-entity>
-
-            <!-- Right Hand Controller (Oculus) -->
-            <a-entity 
-                id="rightHand"
-                oculus-touch-controls="hand: right"
-                laser-controls="hand: right"
-                raycaster="objects: .clickable, .card; lineColor: blue; lineOpacity: 0.5">
-            </a-entity>
-        </a-entity>
+        <!-- Camera with cursor -->
+        <a-camera>
+            <a-cursor 
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                material="color: white"
+                raycaster="objects: .clickable">
+            </a-cursor>
+        </a-camera>
 
     </a-scene>
 
     <script>
+        // Wait for A-frame to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Give A-frame time to initialize
+            setTimeout(initGame, 1000);
+        });
+
         // Game variables
         let cards = [];
         let flippedCards = [];
         let matchedPairs = 0;
         let canFlip = true;
-
-        // Shapes for the cards
         const shapes = ['⭐', '❤️', '🔥', '⚡', '🌙', '☀️'];
 
-        // Initialize the game when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initGame();
-            
-            // Add click listener for reset button
-            document.getElementById('resetButton').addEventListener('click', resetGame);
-        });
-
-        // Initialize the game
         function initGame() {
-            const gameBoard = document.getElementById('gameBoard');
+            console.log("Starting game..."); // Debug log
             
-            // Clear existing cards
-            while (gameBoard.firstChild) {
-                gameBoard.removeChild(gameBoard.firstChild);
+            const gameBoard = document.querySelector('#gameBoard');
+            if (!gameBoard) {
+                console.error("Game board not found!");
+                return;
             }
+
+            // Clear existing cards
+            gameBoard.innerHTML = '';
             
             cards = [];
             flippedCards = [];
@@ -156,55 +102,65 @@
             canFlip = true;
             
             // Hide win message
-            document.getElementById('winMessage').setAttribute('visible', false);
+            const winMessage = document.querySelector('#winMessage');
+            if (winMessage) {
+                winMessage.setAttribute('visible', 'false');
+            }
             
             // Create pairs of shapes
             const cardShapes = [...shapes, ...shapes];
-            
-            // Shuffle the cards
             shuffleArray(cardShapes);
             
-            // Create card elements in a 4x3 grid
-            cardShapes.forEach((shape, index) => {
-                const row = Math.floor(index / 4);
-                const col = index % 4;
+            // Create cards in a 4x3 grid
+            for (let i = 0; i < 12; i++) {
+                const row = Math.floor(i / 4);
+                const col = i % 4;
                 
-                // Calculate position (centered grid)
-                const x = (col - 1.5) * 1.5; // 1.5 units apart
-                const y = (1 - row) * 2;     // 2 units apart vertically
-                const z = 0;
+                // Position cards
+                const x = (col - 1.5) * 1.2;
+                const y = (1 - row) * 1.2;
                 
-                // Create card entity
-                const card = document.createElement('a-entity');
-                card.setAttribute('class', 'card clickable');
-                card.setAttribute('position', `${x} ${y} ${z}`);
-                card.setAttribute('mixin', 'card');
-                card.dataset.shape = shape;
-                card.dataset.index = index;
+                // Create card
+                const card = document.createElement('a-box');
+                card.setAttribute('class', 'clickable');
+                card.setAttribute('position', `${x} ${y} 0`);
+                card.setAttribute('width', '1');
+                card.setAttribute('height', '1');
+                card.setAttribute('depth', '0.1');
+                card.setAttribute('color', '#FFB0B0');
+                card.dataset.shape = cardShapes[i];
+                card.dataset.index = i;
                 
-                // Create card text (question mark initially)
+                // Add text to card
                 const cardText = document.createElement('a-text');
                 cardText.setAttribute('value', '?');
                 cardText.setAttribute('position', '0 0 0.06');
                 cardText.setAttribute('align', 'center');
                 cardText.setAttribute('color', 'white');
-                cardText.setAttribute('scale', '3 3 3');
+                cardText.setAttribute('scale', '2 2 2');
                 
                 card.appendChild(cardText);
                 
-                // Add click event listener
+                // Add click event
                 card.addEventListener('click', function() {
                     flipCard(card);
                 });
                 
                 cards.push(card);
                 gameBoard.appendChild(card);
-            });
+            }
             
             updateScore();
+            
+            // Setup reset button
+            const resetButton = document.querySelector('#resetButton');
+            if (resetButton) {
+                resetButton.addEventListener('click', initGame);
+            }
+            
+            console.log("Game initialized with", cards.length, "cards");
         }
 
-        // Shuffle array function
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -212,51 +168,44 @@
             }
         }
 
-        // Flip card function
         function flipCard(card) {
-            // Check if we can flip and card isn't already flipped or matched
             if (!canFlip || card.flipped || card.matched) {
                 return;
             }
             
             // Flip the card
             card.flipped = true;
-            card.setAttribute('material', 'color: #B1B5FC');
+            card.setAttribute('color', '#B1B5FC');
             card.querySelector('a-text').setAttribute('value', card.dataset.shape);
             flippedCards.push(card);
             
-            // Check if two cards are flipped
             if (flippedCards.length === 2) {
                 canFlip = false;
                 setTimeout(checkMatch, 1000);
             }
         }
 
-        // Check if cards match
         function checkMatch() {
             const [card1, card2] = flippedCards;
             
             if (card1.dataset.shape === card2.dataset.shape) {
-                // Cards match!
+                // Match!
                 card1.matched = true;
                 card2.matched = true;
-                card1.setAttribute('material', 'color: #2ecc71; opacity: 0.5');
-                card2.setAttribute('material', 'color: #2ecc71; opacity: 0.5');
+                card1.setAttribute('color', '#2ecc71');
+                card2.setAttribute('color', '#2ecc71');
                 matchedPairs++;
                 updateScore();
                 
-                // Check if game is won
                 if (matchedPairs === 6) {
-                    setTimeout(() => {
-                        showWinMessage();
-                    }, 1000);
+                    setTimeout(showWinMessage, 500);
                 }
             } else {
-                // Cards don't match, flip them back
+                // No match
                 card1.flipped = false;
                 card2.flipped = false;
-                card1.setAttribute('material', 'color: #FFB0B0');
-                card2.setAttribute('material', 'color: #FFB0B0');
+                card1.setAttribute('color', '#FFB0B0');
+                card2.setAttribute('color', '#FFB0B0');
                 card1.querySelector('a-text').setAttribute('value', '?');
                 card2.querySelector('a-text').setAttribute('value', '?');
             }
@@ -265,23 +214,18 @@
             canFlip = true;
         }
 
-        // Update score display
         function updateScore() {
-            document.getElementById('scoreText').setAttribute('value', `Matches: ${matchedPairs}/6`);
+            const scoreText = document.querySelector('#scoreText');
+            if (scoreText) {
+                scoreText.setAttribute('value', `Matches: ${matchedPairs}/6`);
+            }
         }
 
-        // Show win message
         function showWinMessage() {
-            document.getElementById('winMessage').setAttribute('visible', true);
-            
-            // Add celebration animation
-            document.getElementById('winMessage').setAttribute('animation', 
-                'property: rotation; to: 0 360 0; loop: true; dur: 3000');
-        }
-
-        // Reset game
-        function resetGame() {
-            initGame();
+            const winMessage = document.querySelector('#winMessage');
+            if (winMessage) {
+                winMessage.setAttribute('visible', 'true');
+            }
         }
     </script>
 </body>
