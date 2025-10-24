@@ -1,280 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Match Game</title>
+    <meta charset="utf-8">
+    <title>VR Memory Match Game</title>
+    <meta name="description" content="Memory Match Game in VR">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #00C9FF;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
+            font-family: Arial, sans-serif;
         }
-
-        .game-container {
-            text-align: center;
-            background: white;
-            padding: 20px;
+        
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 500px;
         }
-
-        .intro-screen {
-            display: block;
-        }
-
-        .game-screen {
-            display: none;
-        }
-
-        .win-screen {
-            display: none;
-        }
-
-        .intro-screen h1 {
+        
+        #ui h3 {
+            margin: 0 0 10px 0;
             color: #2c3e50;
-            margin-bottom: 20px;
         }
-
-        .instructions {
-            text-align: left;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        .instructions h3 {
-            color: #34495e;
-            margin-top: 0;
-        }
-
-        .instructions ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-
-        .instructions li {
-            margin: 8px 0;
-            line-height: 1.4;
-        }
-
-        .goal {
-            background-color: #e8f5e8;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #27ae60;
-        }
-
-        /* Win Screen Styles */
-        .win-screen h1 {
-            color: #f39c12;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            animation: bounce 1s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-10px); }
-        }
-
-        .celebration {
-            font-size: 4em;
-            margin: 20px 0;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .win-message {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            font-size: 1.2em;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .win-stats {
-            background-color: #e8f5e8;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #27ae60;
-        }
-
-        .win-stats h3 {
-            color: #27ae60;
-            margin-top: 0;
-        }
-
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 10px;
-            margin: 20px auto;
-            justify-content: center;
-        }
-
-        .card {
-            width: 100px;
-            height: 100px;
-            background-color: #FFB0B0;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 30px;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-        }
-
-        .card.flipped {
-            background-color: #B1B5FC;
-        }
-
-        .card.matched {
-            background-color: #2ecc71;
-            cursor: default;
-            opacity: 0.5;
-        }
-
-        .score {
-            font-size: 18px;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            background-color: #e74c3c;
+        
+        #ui button {
+            padding: 8px 16px;
+            margin: 5px;
+            background-color: #27ae60;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s ease;
         }
-
-        button:hover {
-            background-color: #c0392b;
-        }
-
-        .start-button {
-            background-color: #27ae60;
-            font-size: 18px;
-            padding: 15px 30px;
-        }
-
-        .start-button:hover {
+        
+        #ui button:hover {
             background-color: #219a52;
         }
-
-        .back-button {
-            background-color: #95a5a6;
-        }
-
-        .back-button:hover {
-            background-color: #7f8c8d;
-        }
-
-        .play-again-button {
-            background-color: #f39c12;
-            font-size: 18px;
-            padding: 15px 30px;
-        }
-
-        .play-again-button:hover {
-            background-color: #e67e22;
+        
+        .instructions {
+            max-width: 300px;
+            font-size: 14px;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <!-- Introduction Screen -->
-        <div id="introScreen" class="intro-screen">
-            <h1>🧠 Memory Match Game 🧠</h1>
-            
-            <div class="goal">
-                <strong>🎯 Goal:</strong> Find all 6 matching pairs of shapes to win the game!
-            </div>
-
-            <div class="instructions">
-                <h3>📋 How to Play 📋</h3>
-                <ul>
-                    <li>There are 12 cards arranged in a grid</li>
-                    <li>Each card has a hidden shape behind it</li>
-                    <li>There are 6 different shapes, with 2 cards of each shape</li>
-                    <li>Click on a card to reveal its shape</li>
-                    <li>Click on a second card to see if they match</li>
-                    <li>If the shapes match, both cards will fade away</li>
-                    <li>If they don't match, both cards will flip back over</li>
-                    <li>Keep trying until you find all 6 pairs!</li>
-                </ul>
-            </div>
-
-            <div class="instructions">
-                <h3>💡 Tips 💡</h3>
-                <ul>
-                    <li>Try to remember where you saw each shape</li>
-                    <li>Start by exploring different areas of the grid</li>
-                    <li>Use your memory to make strategic matches</li>
-                </ul>
-            </div>
-
-            <button class="start-button" onclick="startGame()">Start Playing!</button>
+    <!-- UI Overlay -->
+    <div id="ui">
+        <h3>🧠 VR Memory Match Game</h3>
+        <div class="instructions">
+            <p><strong>Goal:</strong> Find all 6 matching pairs!</p>
+            <p><strong>Controls:</strong></p>
+            <ul>
+                <li>Look at a card and pull trigger to flip it</li>
+                <li>Find matching pairs to make them disappear</li>
+                <li>Use thumbstick to move around</li>
+            </ul>
+            <p><strong>Score:</strong> <span id="score">0</span>/6 pairs found</p>
         </div>
-
-        <!-- Game Screen -->
-        <div id="gameScreen" class="game-screen">
-            <h1>Memory Match Game</h1>
-            <div class="score">Matches: <span id="score">0</span>/6</div>
-            <div class="game-board" id="gameBoard"></div>
-            <button onclick="resetGame()">🔄 New Game</button>
-            <button class="back-button" onclick="showIntro()">📖 Instructions</button>
-        </div>
-
-        <!-- Win Screen -->
-        <div id="winScreen" class="win-screen">
-            <h1>🎉 You Won! 🎉</h1>
-            
-            <div class="celebration">🏆</div>
-            
-            <div class="win-message">
-                <strong>Congratulations!</strong><br>
-                You successfully found all 6 matching pairs!<br>
-                Your memory skills are amazing! 🧠✨💡
-            </div>
-
-            <div class="win-stats">
-                <h3>🎯 Game Complete!</h3>
-                <p><strong>Total Pairs Found:</strong> 6/6</p>
-                <p><strong>Status:</strong> Perfect Match! 🌟</p>
-                <p>Great job remembering where all the shapes were hidden!</p>
-            </div>
-
-            <button class="play-again-button" onclick="playAgain()">Play Again</button>
-            <button class="back-button" onclick="showIntro()">📖 View Instructions</button>
-        </div>
+        <button onclick="resetGame()">🔄 New Game</button>
+        <button onclick="toggleInstructions()">📖 Toggle Instructions</button>
     </div>
+
+    <!-- A-Frame VR Scene -->
+    <a-scene 
+        background="color: #00C9FF"
+        vr-mode-ui="enabled: true"
+        device-orientation-permission-ui="enabled: true">
+        
+        <!-- Assets -->
+        <a-assets>
+            <!-- Card materials -->
+            <a-mixin id="card-base" 
+                     geometry="primitive: box; width: 1; height: 1.4; depth: 0.1"
+                     material="color: #FFB0B0"
+                     animation__mouseenter="property: scale; to: 1.1 1.1 1.1; startEvents: mouseenter; dur: 200"
+                     animation__mouseleave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200">
+            </a-mixin>
+            
+            <a-mixin id="card-flipped"
+                     material="color: #B1B5FC">
+            </a-mixin>
+            
+            <a-mixin id="card-matched"
+                     material="color: #2ecc71; opacity: 0.5">
+            </a-mixin>
+        </a-assets>
+
+        <!-- Lighting -->
+        <a-light type="ambient" color="#404040"></a-light>
+        <a-light type="point" position="0 5 0" color="#ffffff"></a-light>
+
+        <!-- Game Board Container -->
+        <a-entity id="gameBoard" position="0 2 -4">
+            <!-- Cards will be generated here by JavaScript -->
+        </a-entity>
+
+        <!-- Instructions Text in VR -->
+        <a-text id="vrInstructions"
+                value="Welcome to VR Memory Match!\nLook at cards and pull trigger to flip them.\nFind all 6 matching pairs to win!"
+                position="0 4 -4"
+                align="center"
+                color="#2c3e50"
+                width="8">
+        </a-text>
+
+        <!-- Score Display in VR -->
+        <a-text id="vrScore"
+                value="Matches: 0/6"
+                position="0 3.5 -4"
+                align="center"
+                color="#27ae60"
+                width="6">
+        </a-text>
+
+        <!-- Win Message (hidden initially) -->
+        <a-text id="winMessage"
+                value="🎉 CONGRATULATIONS! 🎉\nYou found all pairs!\nLook at the New Game button to play again!"
+                position="0 2.5 -3"
+                align="center"
+                color="#f39c12"
+                width="10"
+                visible="false">
+        </a-text>
+
+        <!-- New Game Button in VR -->
+        <a-box id="newGameButton"
+               position="0 1 -3"
+               width="2" height="0.5" depth="0.1"
+               color="#e74c3c"
+               text="value: 🔄 New Game; align: center; width: 8; color: white"
+               class="clickable">
+        </a-box>
+
+        <!-- Camera with VR controls -->
+        <a-entity id="rig" movement-controls position="0 1.6 0">
+            <a-camera look-controls wasd-controls>
+                <a-cursor
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    material="color: white; shader: flat"
+                    raycaster="objects: .clickable">
+                </a-cursor>
+            </a-camera>
+            
+            <!-- VR Controllers -->
+            <a-entity id="leftHand" 
+                      hand-controls="hand: left; handModelStyle: lowPoly; color: #ffcccc"
+                      laser-controls raycaster="objects: .clickable"
+                      line="color: red; opacity: 0.75">
+            </a-entity>
+            
+            <a-entity id="rightHand" 
+                      hand-controls="hand: right; handModelStyle: lowPoly; color: #ccffcc"  
+                      laser-controls raycaster="objects: .clickable"
+                      line="color: blue; opacity: 0.75">
+            </a-entity>
+        </a-entity>
+    </a-scene>
 
     <script>
         // Game variables
@@ -282,58 +170,66 @@
         let flippedCards = [];
         let matchedPairs = 0;
         let canFlip = true;
+        let gameStarted = false;
 
-        // Shapes for the cards (using emojis for simplicity)
+        // Shapes for the cards
         const shapes = ['⭐', '❤️', '🔥', '⚡', '🌙', '☀️'];
 
-        // Show/hide screens
-        function startGame() {
-            document.getElementById('introScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
-            document.getElementById('winScreen').style.display = 'none';
-            initGame();
-        }
-
-        function showIntro() {
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('winScreen').style.display = 'none';
-            document.getElementById('introScreen').style.display = 'block';
-        }
-
-        function showWinScreen() {
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('winScreen').style.display = 'block';
-        }
-
-        function playAgain() {
-            document.getElementById('winScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
-            initGame();
-        }
-
-        // Initialize the game
+        // Initialize the VR game
         function initGame() {
             const gameBoard = document.getElementById('gameBoard');
-            gameBoard.innerHTML = '';
+            
+            // Clear existing cards
+            while (gameBoard.firstChild) {
+                gameBoard.removeChild(gameBoard.firstChild);
+            }
+            
             cards = [];
             flippedCards = [];
             matchedPairs = 0;
             canFlip = true;
+            gameStarted = true;
+            
+            // Hide win message
+            document.getElementById('winMessage').setAttribute('visible', false);
             
             // Create pairs of shapes
             const cardShapes = [...shapes, ...shapes];
-            
-            // Shuffle the cards
             shuffleArray(cardShapes);
             
-            // Create card elements
+            // Create 3D cards in a 4x3 grid
             cardShapes.forEach((shape, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
+                const row = Math.floor(index / 4);
+                const col = index % 4;
+                
+                // Calculate position (centered grid)
+                const x = (col - 1.5) * 1.2; // 1.2 spacing between cards
+                const y = (1 - row) * 1.6;   // 1.6 spacing between rows
+                const z = 0;
+                
+                // Create card entity
+                const card = document.createElement('a-entity');
+                card.setAttribute('mixin', 'card-base');
+                card.setAttribute('position', `${x} ${y} ${z}`);
+                card.setAttribute('class', 'clickable card');
+                
+                // Add question mark text
+                const cardText = document.createElement('a-text');
+                cardText.setAttribute('value', '?');
+                cardText.setAttribute('position', '0 0 0.06');
+                cardText.setAttribute('align', 'center');
+                cardText.setAttribute('color', 'white');
+                cardText.setAttribute('width', '8');
+                card.appendChild(cardText);
+                
+                // Store card data
                 card.dataset.shape = shape;
                 card.dataset.index = index;
+                card.dataset.flipped = 'false';
+                card.dataset.matched = 'false';
+                
+                // Add click event
                 card.addEventListener('click', flipCard);
-                card.textContent = '?';
                 
                 cards.push(card);
                 gameBoard.appendChild(card);
@@ -350,24 +246,29 @@
             }
         }
 
-        // Flip card function
+        // Flip card function for VR
         function flipCard(event) {
             const card = event.target;
             
-            // Check if we can flip and card isn't already flipped or matched
-            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) {
+            if (!canFlip || card.dataset.flipped === 'true' || card.dataset.matched === 'true') {
                 return;
             }
             
             // Flip the card
-            card.classList.add('flipped');
-            card.textContent = card.dataset.shape;
+            card.setAttribute('mixin', 'card-base card-flipped');
+            card.dataset.flipped = 'true';
+            
+            // Update card text to show shape
+            const cardText = card.querySelector('a-text');
+            cardText.setAttribute('value', card.dataset.shape);
+            cardText.setAttribute('color', 'white');
+            
             flippedCards.push(card);
             
             // Check if two cards are flipped
             if (flippedCards.length === 2) {
                 canFlip = false;
-                setTimeout(checkMatch, 1000);
+                setTimeout(checkMatch, 1500);
             }
         }
 
@@ -377,23 +278,27 @@
             
             if (card1.dataset.shape === card2.dataset.shape) {
                 // Cards match!
-                card1.classList.add('matched');
-                card2.classList.add('matched');
+                card1.setAttribute('mixin', 'card-base card-matched');
+                card2.setAttribute('mixin', 'card-base card-matched');
+                card1.dataset.matched = 'true';
+                card2.dataset.matched = 'true';
                 matchedPairs++;
                 updateScore();
                 
                 // Check if game is won
                 if (matchedPairs === 6) {
-                    setTimeout(() => {
-                        showWinScreen();
-                    }, 1000);
+                    setTimeout(showWinMessage, 1000);
                 }
             } else {
                 // Cards don't match, flip them back
-                card1.classList.remove('flipped');
-                card2.classList.remove('flipped');
-                card1.textContent = '?';
-                card2.textContent = '?';
+                card1.setAttribute('mixin', 'card-base');
+                card2.setAttribute('mixin', 'card-base');
+                card1.dataset.flipped = 'false';
+                card2.dataset.flipped = 'false';
+                
+                // Reset text to question marks
+                card1.querySelector('a-text').setAttribute('value', '?');
+                card2.querySelector('a-text').setAttribute('value', '?');
             }
             
             flippedCards = [];
@@ -403,20 +308,35 @@
         // Update score display
         function updateScore() {
             document.getElementById('score').textContent = matchedPairs;
+            document.getElementById('vrScore').setAttribute('value', `Matches: ${matchedPairs}/6`);
+        }
+
+        // Show win message in VR
+        function showWinMessage() {
+            document.getElementById('winMessage').setAttribute('visible', true);
+            // Add celebration animation
+            document.getElementById('winMessage').setAttribute('animation', 
+                'property: rotation; to: 0 360 0; loop: true; dur: 3000');
         }
 
         // Reset game
         function resetGame() {
             initGame();
         }
+
+        // Toggle instructions visibility
+        function toggleInstructions() {
+            const instructions = document.querySelector('.instructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Set up new game button click in VR
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('newGameButton').addEventListener('click', resetGame);
+            
+            // Start the game automatically
+            setTimeout(initGame, 1000);
+        });
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
